@@ -11,6 +11,8 @@ const ioHandler = (req: NextApiRequest, res: NextApiResponseServerIO) => {
       path: '/api/socket_io',
     })
 
+    // console.log({ io })
+
     io.on('connection', (socket) => {
       console.log('Client connected:', socket.id)
 

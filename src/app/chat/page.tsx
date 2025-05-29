@@ -1,46 +1,22 @@
 "use client"
 
+import { useSocket } from '@/hooks/socket'
 import { useEffect, useRef, useState } from 'react'
-import { io, Socket } from 'socket.io-client'
-
-let socket: Socket
 
 type MessageType = {
   message: string;
   socketId: string
 }
 
-export default function Home() {
+export default function ChatRoom() {
   const inputMessageRef = useRef<HTMLInputElement>(null)
   const [input, setInput] = useState('')
   const [messages, setMessages] = useState<MessageType[]>([])
-
-  useEffect(() => {
-    console.log("Effect", socket)
-
-    fetch('/api/socket') 
-    socket = io({ path: '/api/socket_io' })
-
-    socket.on('connect', () => {
-      console.log('Connected:', socket.id)
-    })
-    
-    socket.on('disconnect', () => {
-      console.log('Disconnected:', socket.id)
-    })
-
-    socket.on('message', (msg) => {
-      setMessages((prev) => [...prev, msg])
-    })
-
-    return () => {
-      socket.disconnect()
-    }
-  }, [])
+  const { socket } = useSocket()
 
   const sendMessage = () => {
-    if (input.trim()) {
-      socket.emit('message', {
+    if (socket && input.trim()) {
+      socket?.emit('message', {
         message: input,
         socketId: socket.id
       })
@@ -49,6 +25,12 @@ export default function Home() {
       inputMessageRef.current?.focus()
     }
   }
+  
+  useEffect(() => {
+    socket?.on('message', (msg) => {
+      setMessages((prev) => [...prev, msg])
+    })
+  },[socket?.id])
 
   return (
     <main className='p-8 '>
@@ -70,23 +52,24 @@ export default function Home() {
             Send
           </button>
         </div>
-        <ul className=' rounded-sm p-2'>
-          {messages.map(({ message, socketId }, i) => {
-            const variant = socketId === socket.id ? 'bg-gray-600 mr-4' : 'bg-gray-800 ml-4'
+        {messages && messages.length ? 
+          <ul className='rounded-sm p-2'>
+            {messages.map(({ message, socketId }, i) => {
+              const variant = socketId === socket?.id ? 'bg-gray-600 mr-4' : 'bg-gray-800 ml-4'
             
-            return(
-              <li 
-                className={`transition-all ease-in-out animate-[wiggle_1s_ease-in-out_infinite] rounded-sm p-2 my-2 ${variant}`}
-                key={i}
-              >
-                {message}
-              </li>
-          )})}
-        </ul>
+              return(
+                <li 
+                  className={`transition-all ease-in-out animate-[wiggle_1s_ease-in-out_infinite] rounded-sm p-2 my-2 ${variant}`}
+                  key={i}
+                >
+                  {message}
+                </li>
+            )})}
+          </ul>
+          :
+          <span>No messages yet</span>
+        }
       </div>
-
-
-
     </main>
   )
 }
