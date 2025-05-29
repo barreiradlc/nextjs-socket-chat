@@ -11,14 +11,21 @@ const ioHandler = (req: NextApiRequest, res: NextApiResponseServerIO) => {
       path: '/api/socket_io',
     })
 
-    // console.log({ io })
-
     io.on('connection', (socket) => {
-      console.log('Client connected:', socket.id)
+      console.log('New client connected:', socket.id)
 
-      socket.on('message', (msg) => {
-        console.log('Message received:', msg)
-        io.emit('message', msg) // broadcast to all clients
+      socket.on('join-room', (roomId) => {
+        socket.join(roomId)
+        console.log(`${socket.id} joined room ${roomId}`)
+      })
+
+      socket.on('message', ({ roomId, message, socketId }) => {
+        console.log(`${roomId} - ${message}`)
+        io.to(roomId).emit('message', { 
+          socketId,
+          roomId, 
+          message
+         })
       })
 
       socket.on('disconnect', () => {

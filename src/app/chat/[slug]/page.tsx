@@ -1,7 +1,8 @@
 "use client"
 
-import { useSocket } from '@/hooks/socket'
-import { useEffect, useRef, useState } from 'react'
+import { useSocket } from '@/hooks/socket';
+import { useParams } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
 
 type MessageType = {
   message: string;
@@ -9,34 +10,48 @@ type MessageType = {
 }
 
 export default function ChatRoom() {
+  const { socket } = useSocket()
+  const { slug: roomId } = useParams() as any
+
   const inputMessageRef = useRef<HTMLInputElement>(null)
+  
   const [input, setInput] = useState('')
   const [messages, setMessages] = useState<MessageType[]>([])
-  const { socket } = useSocket()
 
-  const sendMessage = () => {
-    if (socket && input.trim()) {
+  useEffect(() => {
+    if(!socket || !roomId) return;
+    socket?.emit('join-room', roomId)
+    
+    const updateMessagesList = (message: MessageType) => {
+      setMessages((prev) => [...prev, message])
+    }
+
+    socket?.on('message', updateMessagesList)
+
+    return () => {
+      socket?.off('message', updateMessagesList)
+    }
+  },[socket, roomId])
+
+   const sendMessage = () => {
+    if (socket && input.trim() && roomId) {
       socket?.emit('message', {
-        message: input,
-        socketId: socket.id
+        socketId: socket.id,
+        roomId,
+        message: input
       })
+
       setInput('')
 
       inputMessageRef.current?.focus()
     }
   }
-  
-  useEffect(() => {
-    socket?.on('message', (msg) => {
-      setMessages((prev) => [...prev, msg])
-    })
-  },[socket?.id])
 
   return (
-    <main className='p-8 '>
+    <main className='p-8 max-w-full'>
       <div className='w-xs rounded-sm p-4 bg:gray-900'>
       <h1>Socket.IO Chat</h1>
-        <div className='flex flex-row my-8 border rounded-sm py-2 px-2'>
+        <div className='flex flex-row my-8 border rounded-sm p-2'>
           <input
             ref={inputMessageRef}
             placeholder="Type your message..."
@@ -53,13 +68,13 @@ export default function ChatRoom() {
           </button>
         </div>
         {messages && messages.length ? 
-          <ul className='rounded-sm p-2'>
+          <ul className='rounded-sm p-2 animate-fade-in-up delay-300'>
             {messages.map(({ message, socketId }, i) => {
               const variant = socketId === socket?.id ? 'bg-gray-600 mr-4' : 'bg-gray-800 ml-4'
             
               return(
                 <li 
-                  className={`transition-all ease-in-out animate-[wiggle_1s_ease-in-out_infinite] rounded-sm p-2 my-2 ${variant}`}
+                  className={`animate-fade-in-up delay-300 rounded-sm p-2 my-2 ${variant}`}
                   key={i}
                 >
                   {message}

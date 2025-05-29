@@ -1,10 +1,9 @@
 import { getSocket } from "@/lib/socket";
-import { createContext, Dispatch, ReactNode, SetStateAction, useContext, useEffect, useState } from "react";
-import { DefaultEventsMap } from "socket.io";
+import { createContext, ReactNode, useContext, useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
 
 type SocketContextType = {
-  socket: Socket<DefaultEventsMap, DefaultEventsMap> | null;
+  socket: Socket | null;
 }
 
 const SocketContext = createContext({} as SocketContextType)
@@ -14,7 +13,7 @@ type SocketContextProviderProps = {
 }
 
 function SocketContextProvider({ children }: SocketContextProviderProps) {
-  const [socket, setSocket] = useState<Socket<DefaultEventsMap, DefaultEventsMap> | null>(null)
+  const [socket, setSocket] = useState<Socket | null>(null)
 
   useEffect(() => {
     const socketInstance = getSocket()

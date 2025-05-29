@@ -2,6 +2,7 @@
 
 import React from "react";
 import { SocketContextProvider } from "@/hooks/socket";
+import { ChatRoomsContextProvider } from "@/hooks/chatRoom";
 
 export default function ParentProvider({
     children
@@ -10,7 +11,9 @@ export default function ParentProvider({
 }) {
     return (
       <SocketContextProvider>
-        {children}
+        <ChatRoomsContextProvider>
+          {children}
+        </ChatRoomsContextProvider>
       </SocketContextProvider>
     )
 }
