@@ -9,9 +9,13 @@ type MessageType = {
   socketId: string
 }
 
+type ParamsType = {
+  slug: string
+}
+
 export default function ChatRoom() {
   const { socket } = useSocket()
-  const { slug: roomId } = useParams() as any
+  const { slug: roomId } = useParams<ParamsType>() as ParamsType
 
   const inputMessageRef = useRef<HTMLInputElement>(null)
   

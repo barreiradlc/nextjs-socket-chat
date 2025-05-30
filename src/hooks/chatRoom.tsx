@@ -1,5 +1,5 @@
-import { createContext, Dispatch, ReactNode, SetStateAction, useContext, useEffect, useState } from "react";
-import { DefaultEventsMap, Socket } from "socket.io";
+import { createContext, Dispatch, ReactNode, SetStateAction, useContext, useState } from "react";
+import { Socket } from "socket.io";
 
 type RoomType = {
   name: string

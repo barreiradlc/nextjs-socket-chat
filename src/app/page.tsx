@@ -3,23 +3,17 @@ import { useChatRooms } from '@/hooks/chatRoom';
 import { useSocket } from '@/hooks/socket';
 import { nanoid } from 'nanoid';
 import { useRouter } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Socket } from 'socket.io';
-
-type MessageType = {
-  message: string;
-  socketId: string
-}
 
 export default function Chat() {
   const router = useRouter()
   const { socket } = useSocket()
-  const { rooms, createRoom } = useChatRooms()
+  const { createRoom } = useChatRooms()
 
   const inputMessageRef = useRef<HTMLInputElement>(null)
   
   const [input, setInput] = useState('')
-  const [messages, setMessages] = useState<MessageType[]>([])
 
   const sendMessage = () => {
     if (socket && input.trim()) {
@@ -52,23 +46,6 @@ export default function Chat() {
             Send
           </button>
         </div>
-        {messages && messages.length ? 
-          <ul className='rounded-sm p-2'>
-            {messages.map(({ message, socketId }, i) => {
-              const variant = socketId === socket?.id ? 'bg-gray-600 mr-4' : 'bg-gray-800 ml-4'
-            
-              return(
-                <li 
-                  className={`transition-all ease-in-out animate-[wiggle_1s_ease-in-out_infinite] rounded-sm p-2 my-2 ${variant}`}
-                  key={i}
-                >
-                  {message}
-                </li>
-            )})}
-          </ul>
-          :
-          <span>No rooms created yet</span>
-        }
       </div>
     </main>
   )
